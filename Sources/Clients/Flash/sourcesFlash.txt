@@ -1,0 +1,111 @@
+/* Annexe - Code Source de l'application Flash (ActionScript 2.0) */
+/********************************
+* Connexion sur Gougoule Serveur
+*********************************/
+	// nouvelle instance de XMLSocket()
+	socket = new XMLSocket();
+	// à la reception d'un message du serveur, reception(chaine) sera exécutée
+	socket.onXML = reception;
+	//socket.connect(adresseIpDuServeur,port);
+	socket.connect(adresse, port );
+	// dés que la connexion a lieu, connexion() est exécutée
+	socket.onConnect = connexion;
+	// la scene a été chargée une première fois donc true (booléen de sécurité)
+	socket.onClose = fermeture ;
+
+/**************
+* Boutons
+**************/
+/** Bouton "Envoyer" **/
+btn_envoyer.onRelease = envoyerRecherche;
+btn_retour.onRelease = function() {
+	_root.gotoAndStop(1);
+}
+/************
+* Fonctions 
+************/
+// Envoie la requete du client vers le serveur java
+function envoyerRecherche() {
+	// si le champs de recherche n'est pas vide
+	if (_root.txt_mots.text != "") {
+		txtMots= _root.txt_mots.text ;
+		txtMots = traiterRecherche(txtMots);
+		texte = new XML('<requete value="'+txtMots+'" />');
+		}
+		//... et on l'envoi au serveur :
+		_root.socket.send(texte); // Envoi de la requete
+		_root.txt_area.text =""; // Suppression des anciens résultats affichés dans le txt_area
+}
+
+function connexion(isOk) {
+	if (!isOk) // Si la connexion s'est mal passé
+		_root.txt_area.text += "<i>Echec de la connexion...</i>";
+}
+
+// Fonction de reception[[
+function reception(chaine) {
+	// on regarde le premier fils (il est seul donc pas de pb)
+	//_root.txt_area.text += chaine;[
+	chaine = chaine.firstChild; 
+		
+	if (chaine.nodeName == "resultat") { 
+		txt_nbLiens.text=chaine.attributes.nbLiens+" lien(s) trouvé(s)";
+		txt_totalLiens.text=chaine.attributes.totalLiens+" pages référencées";
+		if (chaine.attributes.nbLiens == 0)
+			_root.txt_area.text+="<b>Aucun liens n'a été trouvé pour \""+txt_mots.text+"\" .</b>";	
+	}
+	else {
+		var valeur=supprimerCaractereSpeciaux(chaine.attributes.value);
+		var titre=supprimerCaractereSpeciaux(chaine.attributes.titre);
+		var description=supprimerCaractereSpeciaux(chaine.attributes.description);
+		if(description.length>1)
+			_root.txt_area.text += '<a href="'+valeur+'" target="_blank"><font size="14" color="#0000FF"><u>'+ titre +'</u></font></a><br />Description : '+description+'<br /><font color="#009900">'+chaine.attributes.value+'<b> [ score : '+chaine.attributes.poid+' ]</b></font><br />&nbsp;<br />';
+		else
+			_root.txt_area.text += '<a href="'+valeur+'" target="_blank"><font size="12" color="#0000FF"><u>'+ titre +'</u></font></a><br />Description : pas de description disponible.<br /><font color="#009900">'+chaine.attributes.value+'<b> [ score : '+chaine.attributes.poid+' ]</b></font><br />&nbsp;<br />';
+	}
+}
+
+function fermeture() {
+	socket.close();
+}
+
+function supprimerCaractereSpeciaux(ch:String):String {
+		var caracSpe="";         // caractère spéciale trouver dans la chaine
+        tConv = [["&nbsp;"," "],["&amp;"," "],["&hellip;"," "],["&gt;"," "],["&lt;"," "],["&quot;"," "], ["&copy;"," "] , ["&Ecirc;","E"], ["&Euml;","E"], ["&Egrave;","E"] , ["&Ocirc;","O"] , ["&Ugrave;","U"] , ["&ugrave;","ù"], ["&ucirc;","û"] , ["&Agrave;","A"] ,["&Acirc;","A"] , ["&agrave;","à"] , ["&auml;","ä"],["&acirc;","â"] , ["&egrave;","è"] , ["&eacute;","é"] , ["&ecirc;","ê"] , ["&euml;","ë"], ["&icirc;","î"], ["&iuml;","ï"], ["&ocirc;","ô"],["&ouml;","ö"], ["&otilde;","õ"],["&#339;","oe"],["&ccedil;","ç"],["&ntilde;","ñ"], ["&#8217;","\'"], ["&#160;","\'"], ["&#187;","\'"] ] ;
+		changement=false;
+		do {
+			changement=false;
+			debut = ch.indexOf('&');
+			fin = ch.indexOf(';');		
+			if(fin!=-1) {
+				motif = ch.substring(debut,fin+1);
+				i=0;			
+				while( i<tConv.length && !(motif == tConv[i][0]) )
+					i++;
+				if(i<tConv.length){
+					ch = ch.substring(0,debut)+ tConv[i][1] + ch.substring(fin+1);
+					changement=true;
+				}
+			}
+		}
+		while(changement);
+return ch;	
+}
+
+function traiterRecherche(texte:String):String {
+	  tConv = [['é','e'],['è','e'],['ê','e'],['ô','o'],['ö','o'],['õ','o'],['û','u'],['ü','u'],['ñ','n'],['ç','c'],['à','a'],['â','a'],['ä','a'],['ï','i'],['î','i']] ;
+	  
+	  for(i=0;i<tConv.length;i++) {
+	  changement=false;
+	  do {
+		  changement = false;
+		  indice = texte.indexOf(tConv[i][0]);
+			if (indice>=0) {
+			texte = texte.substring(0,indice) + tConv[i][1] + texte.substring(indice+1);
+			changement = true;
+			}
+	  }
+	  while(changement);
+	  }
+return texte;	  
+}
