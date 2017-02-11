@@ -2,7 +2,7 @@
 
 
 Moteur de recherche complet avec :
-- Un robot (Crawler) dédié au parcourt et à l'indexation du web de page en page.
+- Un robot (Crawler) dédié au parcours et à l'indexation du web de page en page.
 - Un serveur contenant l'indexation du web réalisé par le crawler ou pouvant répondre aux requêtes réalisés par les clients.
 - Des applications clientes, sous forme d'applet Java et Flash.
 
