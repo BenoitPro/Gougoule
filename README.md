@@ -10,8 +10,8 @@ Je vous conseille la lecture de la documentation qui explique plus en détail le
 
 # Schéma explicatif
 
-![alt text](documentation/schema.jpg?raw=true "Schéma")
+![alt text](Documentation/schema.jpg?raw=true "Schéma")
 
 # Screenshot de l'interface cliente en Flash
 
-![alt text](documentation/screenshot1.png?raw=true "screenshot 1")
+![alt text](Documentation/screenshot1.png?raw=true "screenshot 1")
